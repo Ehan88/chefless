@@ -13,11 +13,12 @@ export default function Hero() {
           src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1920&h=1080&fit=crop"
           alt="Fresh food"
           className="w-full h-full object-cover opacity-30"
+          loading="eager"
         />
       </div>
 
-      <div className="relative z-20 max-w-7xl mx-auto px-6 lg:px-12 w-full py-32">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="relative z-20 max-w-7xl mx-auto px-5 sm:px-6 lg:px-12 w-full pt-28 pb-20 sm:pt-32 sm:pb-24">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
           {/* Text */}
           <div className="max-w-2xl">
             <motion.div
@@ -25,7 +26,7 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <span className="inline-block text-xs tracking-[0.3em] text-gray-400 uppercase mb-6 border border-white/10 px-4 py-2 rounded-full">
+              <span className="inline-block text-[10px] sm:text-xs tracking-[0.3em] text-gray-400 uppercase mb-5 sm:mb-6 border border-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
                 Premium Semi-Cooked Meals
               </span>
             </motion.div>
@@ -34,7 +35,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.95] tracking-tight mb-8 font-[family-name:var(--font-display)]"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[0.95] tracking-tight mb-6 sm:mb-8 font-[family-name:var(--font-display)]"
             >
               HOME-COOKED.
               <br />
@@ -47,7 +48,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="text-gray-400 text-lg md:text-xl leading-relaxed mb-10 max-w-md"
+              className="text-gray-400 text-base sm:text-lg md:text-xl leading-relaxed mb-8 sm:mb-10 max-w-md"
             >
               Premium semi-cooked meals prepared for modern living. Fresh ingredients, minimal effort, maximum flavour.
             </motion.p>
@@ -56,25 +57,25 @@ export default function Hero() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.8 }}
-              className="flex flex-wrap gap-4"
+              className="flex flex-wrap gap-3 sm:gap-4"
             >
               <a
                 href="#menu"
-                className="inline-flex items-center gap-3 px-8 py-4 bg-white text-black text-sm font-semibold tracking-[0.15em] uppercase rounded-full hover:bg-gray-200 transition-all duration-300 btn-ripple group"
+                className="inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3.5 sm:py-4 bg-white text-black text-xs sm:text-sm font-semibold tracking-[0.15em] uppercase rounded-full hover:bg-gray-200 transition-all duration-300 btn-ripple group"
               >
                 Order Now
                 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </a>
               <a
                 href="#about"
-                className="inline-flex items-center gap-3 px-8 py-4 border border-white/20 text-white text-sm font-semibold tracking-[0.15em] uppercase rounded-full hover:border-white/40 hover:bg-white/5 transition-all duration-300"
+                className="inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3.5 sm:py-4 border border-white/20 text-white text-xs sm:text-sm font-semibold tracking-[0.15em] uppercase rounded-full hover:border-white/40 hover:bg-white/5 transition-all duration-300"
               >
                 Explore Menu
               </a>
             </motion.div>
           </div>
 
-          {/* Hero Image */}
+          {/* Hero Image — desktop only */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -94,10 +95,10 @@ export default function Hero() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 1.2 }}
-              className="absolute -bottom-6 -left-6 glass-card rounded-2xl p-5 flex items-center gap-4"
+              className="absolute -bottom-6 -left-6 glass-card rounded-2xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4"
             >
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
-                <span className="text-2xl">🍳</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 flex items-center justify-center">
+                <span className="text-xl sm:text-2xl">🍳</span>
               </div>
               <div>
                 <p className="text-sm font-semibold">Ready in 5 mins</p>
@@ -113,7 +114,7 @@ export default function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20"
+        className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-20"
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}

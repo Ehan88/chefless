@@ -1,5 +1,8 @@
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { CartProvider } from './context/CartContext';
+import LoadingScreen from './components/LoadingScreen';
 import Navbar from './components/Navbar';
 import CartDrawer from './components/CartDrawer';
 import CartButton from './components/CartButton';
@@ -34,10 +37,22 @@ function HomePage() {
 }
 
 export default function App() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Show loading screen for 1.8s minimum, or until fonts/images load
+    const timer = setTimeout(() => setLoading(false), 1800);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <BrowserRouter>
       <CartProvider>
         <div className="bg-black text-white min-h-screen">
+          <AnimatePresence mode="wait">
+            {loading && <LoadingScreen key="loader" />}
+          </AnimatePresence>
+
           <Routes>
             <Route
               path="/"

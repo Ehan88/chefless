@@ -3,14 +3,21 @@ import { NAV_LINKS, CONTACT } from '../utils/constants';
 
 export default function Footer() {
   return (
-    <footer id="contact" className="bg-black border-t border-white/5 py-16 lg:py-20">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="grid md:grid-cols-3 gap-12 mb-16">
+    <footer id="contact" className="bg-black border-t border-white/5 py-14 sm:py-16 lg:py-20">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 sm:gap-12 mb-14 sm:mb-16">
           {/* Brand */}
-          <div>
-            <span className="text-xl font-bold tracking-[0.3em] font-[family-name:var(--font-display)] block mb-4">
-              CHEFLESS
-            </span>
+          <div className="sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-2.5 mb-4">
+              <img
+                src="/chef-logo.png"
+                alt="Chefless"
+                className="w-8 h-8 object-contain"
+              />
+              <span className="text-xl font-bold tracking-[0.3em] font-[family-name:var(--font-display)]">
+                CHEFLESS
+              </span>
+            </div>
             <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
               Premium semi-cooked meals for modern living. Fresh ingredients, minimal effort, homemade taste.
             </p>
@@ -18,7 +25,7 @@ export default function Footer() {
 
           {/* Navigation */}
           <div>
-            <h4 className="text-xs tracking-[0.2em] text-gray-500 uppercase mb-6">Navigation</h4>
+            <h4 className="text-xs tracking-[0.2em] text-gray-500 uppercase mb-5">Navigation</h4>
             <div className="space-y-2">
               {NAV_LINKS.map((link) => (
                 <a
@@ -39,8 +46,8 @@ export default function Footer() {
           </div>
 
           {/* Contact */}
-          <div>
-            <h4 className="text-xs tracking-[0.2em] text-gray-500 uppercase mb-6">Contact</h4>
+          <div className="sm:col-span-2 lg:col-span-1">
+            <h4 className="text-xs tracking-[0.2em] text-gray-500 uppercase mb-5">Contact</h4>
             <div className="space-y-3">
               <a
                 href={`tel:${CONTACT.phone}`}
@@ -83,7 +90,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-600">
             © {new Date().getFullYear()} Chefless. All rights reserved.
           </p>

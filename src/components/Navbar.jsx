@@ -34,10 +34,15 @@ export default function Navbar() {
             : 'bg-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between h-20">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-12 flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
-          <a href="#home" className="flex items-center gap-2">
-            <span className="text-xl font-bold tracking-[0.3em] font-[family-name:var(--font-display)]">
+          <a href="#home" className="flex items-center gap-2.5 shrink-0">
+            <img
+              src="/chef-logo.png"
+              alt="Chefless"
+              className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
+            />
+            <span className="text-lg sm:text-xl font-bold tracking-[0.3em] font-[family-name:var(--font-display)]">
               CHEFLESS
             </span>
           </a>
@@ -66,7 +71,7 @@ export default function Navbar() {
           {/* Mobile Hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden text-white p-2"
+            className="lg:hidden text-white p-2 -mr-2"
             aria-label="Toggle menu"
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
