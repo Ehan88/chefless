@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Package, CheckCircle2, ChefHat, Truck, XCircle, Clock, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { fetchOrder, lookupOrdersByPhone } from '../utils/api';
 
 const STATUS_STEPS = [
@@ -101,13 +101,27 @@ function OrderCard({ order }) {
 }
 
 export default function OrderTracking() {
+  const { id } = useParams();
   const [mode, setMode] = useState('id'); // 'id' or 'phone'
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(id || '');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searched, setSearched] = useState(false);
   const navigate = useNavigate();
+
+  // Auto-load from URL param
+  useEffect(() => {
+    if (id) {
+      setInput(id);
+      setLoading(true);
+      setSearched(true);
+      fetchOrder(id)
+        .then((order) => setOrders([order]))
+        .catch(() => setError('Order not found.'))
+        .finally(() => setLoading(false));
+    }
+  }, [id]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
