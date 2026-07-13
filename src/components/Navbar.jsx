@@ -61,12 +61,20 @@ export default function Navbar() {
           </div>
 
           {/* Desktop CTA */}
-          <a
-            href="#menu"
-            className="hidden lg:inline-flex items-center px-6 py-2.5 bg-white text-black text-xs font-semibold tracking-[0.15em] uppercase rounded-full hover:bg-gray-200 transition-colors duration-300 btn-ripple"
-          >
-            Order Now
-          </a>
+          <div className="hidden lg:flex items-center gap-4">
+            <a
+              href="/track"
+              className="text-xs tracking-[0.2em] text-gray-400 hover:text-white transition-colors duration-300 uppercase"
+            >
+              Track Order
+            </a>
+            <a
+              href="#menu"
+              className="inline-flex items-center px-6 py-2.5 bg-white text-black text-xs font-semibold tracking-[0.15em] uppercase rounded-full hover:bg-gray-200 transition-colors duration-300 btn-ripple"
+            >
+              Order Now
+            </a>
+          </div>
 
           {/* Mobile Hamburger */}
           <button
@@ -103,10 +111,20 @@ export default function Navbar() {
               </motion.a>
             ))}
             <motion.a
-              href="#menu"
+              href="/track"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
+              onClick={() => setMobileOpen(false)}
+              className="text-lg tracking-[0.3em] text-gray-300 hover:text-white transition-colors uppercase"
+            >
+              Track Order
+            </motion.a>
+            <motion.a
+              href="#menu"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.56 }}
               onClick={() => setMobileOpen(false)}
               className="mt-4 px-8 py-3 bg-white text-black text-sm font-semibold tracking-[0.15em] uppercase rounded-full"
             >
