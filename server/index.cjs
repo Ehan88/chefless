@@ -182,12 +182,23 @@ app.get('/api/stats', (req, res) => {
 
 // ─── Serve Frontend (Production) ─────────────────────────────────
 const distPath = path.join(__dirname, '..', 'dist');
-app.use(express.static(distPath));
+const indexPath = path.join(distPath, 'index.html');
+const fs = require('fs');
+
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  console.log(`📁 Serving static from: ${distPath}`);
+} else {
+  console.log(`⚠️  dist/ not found at ${distPath}`);
+}
 
 // SPA fallback — serve index.html for all non-API routes
-app.get('/{*splat}', (req, res) => {
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(distPath, 'index.html'));
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send('Build not found. Run npm run build first.');
   }
 });
 
