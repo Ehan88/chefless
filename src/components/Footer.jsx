@@ -19,16 +19,22 @@ export default function Footer() {
           {/* Navigation */}
           <div>
             <h4 className="text-xs tracking-[0.2em] text-gray-500 uppercase mb-6">Navigation</h4>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
               {NAV_LINKS.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
-                  className="text-sm text-gray-400 hover:text-white transition-colors duration-300"
+                  className="block text-sm text-gray-400 hover:text-white transition-colors duration-300"
                 >
                   {link.name}
                 </a>
               ))}
+              <a
+                href="/track"
+                className="block text-sm text-gray-400 hover:text-white transition-colors duration-300"
+              >
+                TRACK ORDER
+              </a>
             </div>
           </div>
 

@@ -141,6 +141,16 @@ app.get('/api/orders/:id', (req, res) => {
   });
 });
 
+// Lookup orders by phone (customer tracking)
+app.get('/api/orders/lookup/:phone', (req, res) => {
+  const phone = req.params.phone.replace(/\D/g, '').slice(-10); // last 10 digits
+  const orders = db.prepare(
+    "SELECT * FROM orders WHERE REPLACE(REPLACE(REPLACE(phone, '+', ''), '-', ''), ' ', '') LIKE ? ORDER BY id DESC LIMIT 5"
+  ).all(`%${phone}%`);
+
+  res.json(orders.map(o => ({ ...o, items: JSON.parse(o.items) })));
+});
+
 // Update order status (admin)
 app.patch('/api/orders/:id/status', (req, res) => {
   const { status } = req.body;

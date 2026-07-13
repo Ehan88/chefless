@@ -96,12 +96,20 @@ export default function Checkout() {
             </div>
           </div>
 
-          <a
-            href="/"
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-black text-sm font-semibold tracking-[0.15em] uppercase rounded-full hover:bg-gray-200 transition-colors"
-          >
-            Back to Home
-          </a>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={() => navigate(`/track/${success.id}`)}
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-black text-sm font-semibold tracking-[0.15em] uppercase rounded-full hover:bg-gray-200 transition-colors"
+            >
+              Track Order
+            </button>
+            <a
+              href="/"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white/5 text-white text-sm font-semibold tracking-[0.15em] uppercase rounded-full hover:bg-white/10 transition-colors border border-white/10"
+            >
+              Back to Home
+            </a>
+          </div>
         </motion.div>
       </div>
     );

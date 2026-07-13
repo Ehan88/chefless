@@ -41,3 +41,15 @@ export async function fetchStats() {
   if (!res.ok) throw new Error('Failed to fetch stats');
   return res.json();
 }
+
+export async function fetchOrder(id) {
+  const res = await fetch(`${API_BASE}/api/orders/${id}`);
+  if (!res.ok) throw new Error('Order not found');
+  return res.json();
+}
+
+export async function lookupOrdersByPhone(phone) {
+  const res = await fetch(`${API_BASE}/api/orders/lookup/${encodeURIComponent(phone)}`);
+  if (!res.ok) throw new Error('Lookup failed');
+  return res.json();
+}

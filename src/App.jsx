@@ -13,6 +13,7 @@ import FAQ from './components/FAQ';
 import FinalCTA from './components/FinalCTA';
 import Footer from './components/Footer';
 import Checkout from './pages/Checkout';
+import OrderTracking from './pages/OrderTracking';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminGate from './components/AdminGate';
 
@@ -50,6 +51,8 @@ export default function App() {
               }
             />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/track" element={<OrderTracking />} />
+            <Route path="/track/:id" element={<OrderTracking />} />
             <Route path="/admin" element={<AdminGate><AdminDashboard /></AdminGate>} />
           </Routes>
         </div>
