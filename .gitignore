@@ -3,3 +3,5 @@ dist
 server/chefless.db
 .env
 *.log
+
+.vercel

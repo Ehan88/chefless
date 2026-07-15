@@ -1,4 +1,6 @@
-const API_BASE = import.meta.env.DEV ? (import.meta.env.VITE_API_URL || 'http://localhost:3001') : '';
+const API_BASE = import.meta.env.DEV
+  ? (import.meta.env.VITE_API_URL || 'http://localhost:3001')
+  : (import.meta.env.VITE_API_URL || 'https://chefless.onrender.com');
 
 export async function fetchProducts() {
   const res = await fetch(`${API_BASE}/api/products`);

@@ -1,0 +1,21 @@
+{
+  "rewrites": [
+    {
+      "source": "/((?!assets/).*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "type": "service",
+        "service": "chefless"
+      }
+    }
+  ],
+  "services": {
+    "chefless": {
+      "root": ".",
+      "framework": "vite"
+    }
+  }
+}
