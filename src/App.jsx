@@ -17,12 +17,16 @@ import FinalCTA from './components/FinalCTA';
 import Footer from './components/Footer';
 import Checkout from './pages/Checkout';
 import OrderTracking from './pages/OrderTracking';
+import Leaderboard from './pages/Leaderboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminGate from './components/AdminGate';
+import TableMenu from './pages/TableMenu';
+import KitchenDisplay from './pages/KitchenDisplay';
 
 function HomePage() {
   return (
     <>
+      <Navbar />
       <Hero />
       <WhatIsChefless />
       <HowItWorks />
@@ -32,6 +36,8 @@ function HomePage() {
       <FAQ />
       <FinalCTA />
       <Footer />
+      <CartDrawer />
+      <CartButton />
     </>
   );
 }
@@ -40,7 +46,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Show loading screen for 1.8s minimum, or until fonts/images load
     const timer = setTimeout(() => setLoading(false), 1800);
     return () => clearTimeout(timer);
   }, []);
@@ -54,20 +59,22 @@ export default function App() {
           </AnimatePresence>
 
           <Routes>
-            <Route
-              path="/"
-              element={
-                <>
-                  <Navbar />
-                  <HomePage />
-                  <CartDrawer />
-                  <CartButton />
-                </>
-              }
-            />
+            {/* Main Website */}
+            <Route path="/" element={<HomePage />} />
+
+            {/* Checkout & Tracking */}
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/track" element={<OrderTracking />} />
             <Route path="/track/:id" element={<OrderTracking />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/admin" element={<AdminGate><AdminDashboard /></AdminGate>} />
+            {/* Tapez: Table Menu (NFC/BLE target) */}
+            <Route path="/table/:id" element={<TableMenu />} />
+
+            {/* Tapez: Kitchen Display */}
+            <Route path="/kitchen" element={<KitchenDisplay />} />
+
+            {/* Admin */}
             <Route path="/admin" element={<AdminGate><AdminDashboard /></AdminGate>} />
           </Routes>
         </div>

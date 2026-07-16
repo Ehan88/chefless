@@ -55,3 +55,15 @@ export async function lookupOrdersByPhone(phone) {
   if (!res.ok) throw new Error('Lookup failed');
   return res.json();
 }
+
+export async function fetchLeaderboard() {
+  const res = await fetch(`${API_BASE}/api/leaderboard`);
+  if (!res.ok) throw new Error('Failed to fetch leaderboard');
+  return res.json();
+}
+
+export async function fetchCustomerPoints(phone) {
+  const res = await fetch(`${API_BASE}/api/points/${encodeURIComponent(phone)}`);
+  if (!res.ok) throw new Error('Failed to fetch points');
+  return res.json();
+}

@@ -42,6 +42,12 @@ export default function Footer() {
               >
                 TRACK ORDER
               </a>
+              <a
+                href="/leaderboard"
+                className="block text-sm text-gray-400 hover:text-white transition-colors duration-300"
+              >
+                LEADERBOARD
+              </a>
             </div>
           </div>
 

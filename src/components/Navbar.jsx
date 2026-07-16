@@ -69,6 +69,12 @@ export default function Navbar() {
               Track Order
             </a>
             <a
+              href="/leaderboard"
+              className="text-xs tracking-[0.2em] text-gray-400 hover:text-white transition-colors duration-300 uppercase"
+            >
+              Leaderboard
+            </a>
+            <a
               href="#menu"
               className="inline-flex items-center px-6 py-2.5 bg-white text-black text-xs font-semibold tracking-[0.15em] uppercase rounded-full hover:bg-gray-200 transition-colors duration-300 btn-ripple"
             >
@@ -119,6 +125,16 @@ export default function Navbar() {
               className="text-lg tracking-[0.3em] text-gray-300 hover:text-white transition-colors uppercase"
             >
               Track Order
+            </motion.a>
+            <motion.a
+              href="/leaderboard"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.53 }}
+              onClick={() => setMobileOpen(false)}
+              className="text-lg tracking-[0.3em] text-gray-300 hover:text-white transition-colors uppercase"
+            >
+              Leaderboard
             </motion.a>
             <motion.a
               href="#menu"

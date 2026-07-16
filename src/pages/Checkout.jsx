@@ -44,7 +44,7 @@ export default function Checkout() {
         items: items.map((i) => ({ id: i.id, quantity: i.quantity })),
       });
       clearCart();
-      setSuccess(result.order);
+      setSuccess({ ...result.order, points_earned: result.points_earned });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -93,6 +93,12 @@ export default function Checkout() {
                 <span className="text-gray-400">Status</span>
                 <span className="capitalize">{success.status}</span>
               </div>
+              {success.points_earned > 0 && (
+                <div className="flex justify-between items-center pt-2 border-t border-white/5">
+                  <span className="text-gray-400">Points Earned</span>
+                  <span className="text-yellow-400 font-bold text-lg">+{success.points_earned} pts</span>
+                </div>
+              )}
             </div>
           </div>
 
