@@ -144,7 +144,7 @@ export default function Leaderboard() {
         )}
 
         {/* Tab Content */}
-        {activeTab === 'overview' && (
+        {profile && activeTab === 'overview' && (
           <div className="space-y-5">
             <LeaderboardRankings leaders={leaders} loading={loading} />
             <ReferralSection profile={profile} />
