@@ -96,6 +96,46 @@ if (menuCount === 0) {
   console.log('🌱 Seeded 14 menu items');
 }
 
+
+db.exec(\`
+  CREATE TABLE IF NOT EXISTS rewards (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    points_cost INTEGER NOT NULL,
+    type TEXT DEFAULT 'discount',
+    value INTEGER DEFAULT 0,
+    image TEXT DEFAULT '',
+    active INTEGER DEFAULT 1,
+    stock INTEGER DEFAULT -1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+\`);
+
+db.exec(\`
+  CREATE TABLE IF NOT EXISTS redemptions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    phone TEXT NOT NULL,
+    reward_id INTEGER NOT NULL,
+    points_spent INTEGER NOT NULL,
+    code TEXT DEFAULT '',
+    status TEXT DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (reward_id) REFERENCES rewards(id)
+  )
+\`);
+
+db.exec(\`
+  CREATE TABLE IF NOT EXISTS referrals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    referrer_phone TEXT NOT NULL,
+    referee_phone TEXT NOT NULL UNIQUE,
+    bonus_points INTEGER DEFAULT 20,
+    status TEXT DEFAULT 'completed',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+\`);
+
 // ─── Seed tables if empty ────────────────────────────────
 const tableCount = db.prepare('SELECT COUNT(*) as c FROM tables').get().c;
 if (tableCount === 0) {
@@ -107,6 +147,32 @@ if (tableCount === 0) {
   }
   console.log('🪑 Seeded 10 tables');
 }
+
+// ─── Seed rewards if empty ──────────────────────────────
+const rewardCount = db.prepare('SELECT COUNT(*) as c FROM rewards').get().c;
+if (rewardCount === 0) {
+  const seedReward = db.prepare(
+    'INSERT INTO rewards (name, description, points_cost, type, value, active) VALUES (?, ?, ?, ?, ?, ?)'
+  );
+  const rewardData = [
+    ['10% Off Next Order', 'Get 10% off on your next order (up to ₹50)', 30, 'discount', 10, 1],
+    ['Free Masala Chai', 'Complimentary Masala Chai with your next order', 25, 'free_item', 29, 1],
+    ['Free Lime Soda', 'Fresh lime soda on the house', 30, 'free_item', 49, 1],
+    ['₹50 Off', 'Flat ₹50 off on orders above ₹200', 75, 'discount', 50, 1],
+    ['Free Gobi Manchurian', 'Complimentary starter with any order', 60, 'free_item', 149, 1],
+    ['Free Chicken 65', 'Spicy fried chicken on us!', 100, 'free_item', 199, 1],
+    ['₹100 Off', 'Flat ₹100 off on orders above ₹300', 120, 'discount', 100, 1],
+    ['Free Kerala Porotta (4pc)', 'Four flaky porottas, free!', 80, 'free_item', 356, 1],
+    ['VIP Early Access', 'Get menu items 30 min before launch', 200, 'perk', 0, 1],
+    ['Birthday Special', 'Free meal on your birthday (up to ₹300)', 250, 'perk', 300, 1],
+  ];
+  for (const r of rewardData) {
+    seedReward.run(...r);
+  }
+  console.log('🎁 Seeded 10 rewards');
+}
+
+
 
 // ─── Helper ──────────────────────────────────────────────
 function calcPoints(total) {
@@ -123,6 +189,85 @@ function getTier(points) {
   if (points >= 150) return { name: 'Gold', color: '#FFD700', icon: '🥇' };
   if (points >= 50) return { name: 'Silver', color: '#C0C0C0', icon: '🥈' };
   return { name: 'Bronze', color: '#CD7F32', icon: '🥉' };
+}
+
+
+// ─── Streak & Achievements Helpers ────────────────────
+function getStreak(phone) {
+  const orders = db.prepare(`
+    SELECT date(created_at) as order_date
+    FROM orders
+    WHERE phone LIKE ? AND status != 'cancelled'
+    ORDER BY created_at DESC
+    LIMIT 60
+  `).all(`%${phone}%`);
+
+  if (orders.length === 0) return { current: 0, best: 0, lastOrder: null };
+
+  const dates = [...new Set(orders.map(o => o.order_date))].sort().reverse();
+  let currentStreak = 0;
+  let bestStreak = 0;
+  const today = new Date().toISOString().split('T')[0];
+
+  for (let i = 0; i < dates.length; i++) {
+    if (i === 0) {
+      const diff = (new Date(today) - new Date(dates[0])) / (1000 * 60 * 60 * 24);
+      if (diff > 1) break;
+      currentStreak = 1;
+    } else {
+      const prev = new Date(dates[i - 1]);
+      const curr = new Date(dates[i]);
+      const diff = (prev - curr) / (1000 * 60 * 60 * 24);
+      if (diff <= 1) {
+        currentStreak++;
+      } else {
+        if (currentStreak > bestStreak) bestStreak = currentStreak;
+        currentStreak = 1;
+      }
+    }
+  }
+  if (currentStreak > bestStreak) bestStreak = currentStreak;
+
+  return { current: currentStreak, best: bestStreak, lastOrder: dates[0] || null };
+}
+
+function getAchievements(phone) {
+  const r = db.prepare(`
+    SELECT COUNT(*) as order_count, COALESCE(SUM(points), 0) as total_points,
+           COALESCE(SUM(total), 0) as total_spent
+    FROM orders WHERE phone LIKE ? AND status != 'cancelled'
+  `).get(`%${phone}%`);
+
+  const streak = getStreak(phone);
+  const refCount = db.prepare('SELECT COUNT(*) as c FROM referrals WHERE referrer_phone LIKE ?')
+    .get(`%${phone}%`).c;
+
+  const a = [];
+  // Order milestones
+  a.push({ id: 'first_order', name: 'First Bite', desc: 'Placed your first order', icon: '🍽️', unlocked: r.order_count >= 1, progress: r.order_count, target: 1 });
+  a.push({ id: 'five_orders', name: 'Regular', desc: '5 orders completed', icon: '🔥', unlocked: r.order_count >= 5, progress: r.order_count, target: 5 });
+  a.push({ id: 'ten_orders', name: 'Loyalist', desc: '10 orders completed', icon: '💪', unlocked: r.order_count >= 10, progress: r.order_count, target: 10 });
+  a.push({ id: 'twentyfive', name: 'Legend', desc: '25 orders completed', icon: '🏆', unlocked: r.order_count >= 25, progress: r.order_count, target: 25 });
+  a.push({ id: 'fifty', name: 'Royalty', desc: '50 orders completed', icon: '👑', unlocked: r.order_count >= 50, progress: r.order_count, target: 50 });
+  // Spending
+  a.push({ id: 'spent_500', name: 'Big Spender', desc: 'Spent ₹500+', icon: '💰', unlocked: r.total_spent >= 500, progress: r.total_spent, target: 500 });
+  a.push({ id: 'spent_2k', name: 'Foodie Elite', desc: 'Spent ₹2,000+', icon: '💎', unlocked: r.total_spent >= 2000, progress: r.total_spent, target: 2000 });
+  // Streak
+  a.push({ id: 'streak_3', name: 'On a Roll', desc: '3-day streak', icon: '⚡', unlocked: streak.best >= 3, progress: streak.best, target: 3 });
+  a.push({ id: 'streak_7', name: 'Week Warrior', desc: '7-day streak', icon: '🌟', unlocked: streak.best >= 7, progress: streak.best, target: 7 });
+  // Tier
+  const tier = getTier(r.total_points);
+  a.push({ id: 'gold', name: 'Gold Member', desc: 'Reached Gold tier', icon: '🥇', unlocked: r.total_points >= 150, progress: r.total_points, target: 150 });
+  a.push({ id: 'platinum', name: 'Platinum Elite', desc: 'Reached Platinum tier', icon: '💠', unlocked: r.total_points >= 300, progress: r.total_points, target: 300 });
+  // Referrals
+  a.push({ id: 'first_ref', name: 'Social Butterfly', desc: 'Referred 1 friend', icon: '🦋', unlocked: refCount >= 1, progress: refCount, target: 1 });
+  a.push({ id: 'five_ref', name: 'Ambassador', desc: 'Referred 5 friends', icon: '🤝', unlocked: refCount >= 5, progress: refCount, target: 5 });
+  return a;
+}
+
+function getReferralCode(phone) {
+  const clean = phone.replace(/\D/g, '').slice(-10);
+  return 'CHEF' + clean.slice(-4).toUpperCase();
 }
 
 const STATUS_COLORS = {
@@ -421,27 +566,26 @@ app.patch('/api/orders/:id/status', (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════
-// API — Leaderboard & Points
+// API — Leaderboard, Points, Rewards, Profile, Achievements
 // ═══════════════════════════════════════════════════════════
 
-// Leaderboard — top customers by total points
+// Leaderboard — top customers by total points (with search)
 app.get('/api/leaderboard', (req, res) => {
-  const leaders = db.prepare(`
+  const { search } = req.query;
+  let query = `
     SELECT customer_name, phone, SUM(points) as total_points, COUNT(*) as order_count
-    FROM orders
-    WHERE phone != '' AND status != 'cancelled'
-    GROUP BY phone
-    ORDER BY total_points DESC
-    LIMIT 20
-  `).all();
-
+    FROM orders WHERE phone != '' AND status != 'cancelled'
+  `;
+  const params = [];
+  if (search) {
+    query += ` AND (customer_name LIKE ? OR phone LIKE ?)`;
+    params.push(`%${search}%`, `%${search}%`);
+  }
+  query += ` GROUP BY phone ORDER BY total_points DESC LIMIT 50`;
+  const leaders = db.prepare(query).all(...params);
   res.json(leaders.map((l, i) => ({
-    rank: i + 1,
-    name: l.customer_name,
-    phone: l.phone,
-    points: l.total_points,
-    orders: l.order_count,
-    tier: getTier(l.total_points),
+    rank: i + 1, name: l.customer_name, phone: l.phone,
+    points: l.total_points, orders: l.order_count, tier: getTier(l.total_points),
   })));
 });
 
@@ -454,13 +598,132 @@ app.get('/api/points/:phone', (req, res) => {
     WHERE REPLACE(REPLACE(REPLACE(phone, '+', ''), '-', ''), ' ', '') LIKE ?
       AND status != 'cancelled'
   `).get(`%${phone}%`);
-
   const tier = getTier(result.total_points);
+  res.json({ points: result.total_points, orders: result.order_count, tier });
+});
+
+// ─── Enhanced Profile ─────────────────────────────────
+app.get('/api/profile/:phone', (req, res) => {
+  const phone = req.params.phone.replace(/\D/g, '').slice(-10);
+  const r = db.prepare(`
+    SELECT COALESCE(SUM(points), 0) as total_points, COUNT(*) as order_count,
+           COALESCE(SUM(total), 0) as total_spent, MIN(created_at) as member_since
+    FROM orders
+    WHERE REPLACE(REPLACE(REPLACE(phone, '+', ''), '-', ''), ' ', '') LIKE ?
+      AND status != 'cancelled'
+  `).get(`%${phone}%`);
+
+  const tier = getTier(r.total_points);
+  const streak = getStreak(phone);
+  const tiers = [
+    { name: 'Bronze', min: 0, icon: '🥉', color: '#CD7F32' },
+    { name: 'Silver', min: 50, icon: '🥈', color: '#C0C0C0' },
+    { name: 'Gold', min: 150, icon: '🥇', color: '#FFD700' },
+    { name: 'Platinum', min: 300, icon: '💎', color: '#E5E4E2' },
+  ];
+  const currentTierIdx = tiers.findIndex(t => t.name === tier.name);
+  const nextTier = currentTierIdx < tiers.length - 1 ? tiers[currentTierIdx + 1] : null;
+  const pointsToNext = nextTier ? Math.max(0, nextTier.min - r.total_points) : 0;
+  const progress = nextTier && nextTier.min > 0 ? Math.min(100, (r.total_points / nextTier.min) * 100) : 100;
+
+  const favItem = db.prepare(`
+    SELECT json_extract(value, '$.name') as name, COUNT(*) as cnt
+    FROM orders, json_each(orders.items)
+    WHERE phone LIKE ? AND status != 'cancelled'
+    GROUP BY name ORDER BY cnt DESC LIMIT 1
+  `).get(`%${phone}%`);
+
+  const referralCode = getReferralCode(phone);
+  const referralCount = db.prepare('SELECT COUNT(*) as c FROM referrals WHERE referrer_phone LIKE ?')
+    .get(`%${phone}%`).c;
+
+  const recentOrders = db.prepare(`
+    SELECT id, total, points, status, created_at FROM orders
+    WHERE phone LIKE ? AND status != 'cancelled' ORDER BY created_at DESC LIMIT 5
+  `).all(`%${phone}%`);
+
+  const rankResult = db.prepare(`
+    SELECT COUNT(*) + 1 as rank FROM (
+      SELECT phone, SUM(points) as tp FROM orders WHERE phone != '' AND status != 'cancelled'
+      GROUP BY phone HAVING tp > ?
+    )
+  `).get(r.total_points);
+
   res.json({
-    points: result.total_points,
-    orders: result.order_count,
-    tier,
+    points: r.total_points, orders: r.order_count, totalSpent: r.total_spent,
+    tier, streak, favoriteItem: favItem ? favItem.name : null,
+    memberSince: r.member_since,
+    nextTier: nextTier && r.total_points < nextTier.min ? nextTier : null,
+    pointsToNext, progress, referralCode, referralCount, recentOrders, rank: rankResult.rank,
   });
+});
+
+// ─── Achievements ─────────────────────────────────────
+app.get('/api/achievements/:phone', (req, res) => {
+  const phone = req.params.phone.replace(/\D/g, '').slice(-10);
+  const achievements = getAchievements(phone);
+  const unlocked = achievements.filter(a => a.unlocked).length;
+  res.json({ achievements, unlocked, total: achievements.length });
+});
+
+// ─── Rewards Catalog ──────────────────────────────────
+app.get('/api/rewards', (req, res) => {
+  const rewards = db.prepare('SELECT * FROM rewards WHERE active = 1 ORDER BY points_cost ASC').all();
+  res.json(rewards);
+});
+
+// ─── Redeem Reward ────────────────────────────────────
+app.post('/api/redeem', (req, res) => {
+  const { phone, reward_id } = req.body;
+  if (!phone || !reward_id) return res.status(400).json({ error: 'Phone and reward_id required' });
+  const phoneClean = phone.replace(/\D/g, '').slice(-10);
+  const reward = db.prepare('SELECT * FROM rewards WHERE id = ? AND active = 1').get(reward_id);
+  if (!reward) return res.status(404).json({ error: 'Reward not found' });
+  if (reward.stock === 0) return res.status(400).json({ error: 'Out of stock' });
+
+  const r = db.prepare(`
+    SELECT COALESCE(SUM(points), 0) as tp FROM orders
+    WHERE REPLACE(REPLACE(REPLACE(phone, '+', ''), '-', ''), ' ', '') LIKE ?
+      AND status != 'cancelled'
+  `).get(`%${phoneClean}%`);
+  const used = db.prepare(`SELECT COALESCE(SUM(points_spent), 0) as u FROM redemptions WHERE phone LIKE ? AND status = 'active'`)
+    .get(`%${phoneClean}%`).u;
+  const available = r.tp - used;
+  if (available < reward.points_cost) return res.status(400).json({ error: `Need ${reward.points_cost - available} more points` });
+
+  const code = 'CHF-' + Date.now().toString(36).toUpperCase();
+  db.prepare('INSERT INTO redemptions (phone, reward_id, points_spent, code) VALUES (?, ?, ?, ?)')
+    .run(phoneClean, reward_id, reward.points_cost, code);
+  if (reward.stock > 0) db.prepare('UPDATE rewards SET stock = stock - 1 WHERE id = ?').run(reward_id);
+
+  res.json({ success: true, redemption: { code, reward: reward.name, points_spent: reward.points_cost, description: reward.description } });
+});
+
+// ─── My Redemptions ───────────────────────────────────
+app.get('/api/my-rewards/:phone', (req, res) => {
+  const phone = req.params.phone.replace(/\D/g, '').slice(-10);
+  const redemptions = db.prepare(`
+    SELECT r.*, rw.name as reward_name, rw.description as reward_desc, rw.type as reward_type
+    FROM redemptions r JOIN rewards rw ON r.reward_id = rw.id
+    WHERE r.phone LIKE ? ORDER BY r.created_at DESC
+  `).all(`%${phone}%`);
+  res.json(redemptions);
+});
+
+// ─── Referral Apply ───────────────────────────────────
+app.post('/api/referral/apply', (req, res) => {
+  const { phone, referral_code } = req.body;
+  if (!phone || !referral_code) return res.status(400).json({ error: 'Phone and code required' });
+  const phoneClean = phone.replace(/\D/g, '').slice(-10);
+  const code = referral_code.trim().toUpperCase();
+  const suffix = code.replace('CHEF', '');
+  const referrer = db.prepare(`SELECT DISTINCT phone FROM orders WHERE phone LIKE ? AND phone != '' LIMIT 1`).get(`%${suffix}%`);
+  if (!referrer) return res.status(404).json({ error: 'Invalid referral code' });
+  if (referrer.phone.replace(/\D/g, '').slice(-10) === phoneClean) return res.status(400).json({ error: "Can't refer yourself" });
+  const existing = db.prepare('SELECT id FROM referrals WHERE referee_phone LIKE ?').get(`%${phoneClean}%`);
+  if (existing) return res.status(400).json({ error: 'Already used a referral code' });
+  db.prepare('INSERT INTO referrals (referrer_phone, referee_phone, bonus_points) VALUES (?, ?, 20)').run(referrer.phone, phoneClean);
+  res.json({ success: true, message: 'Referral applied! +20 bonus points for you and your friend.' });
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -513,4 +776,3 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`📊 Admin:       http://localhost:${PORT}/admin`);
   console.log('');
 });
-

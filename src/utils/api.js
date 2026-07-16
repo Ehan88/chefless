@@ -56,8 +56,11 @@ export async function lookupOrdersByPhone(phone) {
   return res.json();
 }
 
-export async function fetchLeaderboard() {
-  const res = await fetch(`${API_BASE}/api/leaderboard`);
+// ─── Leaderboard & Rewards ──────────────────────────
+
+export async function fetchLeaderboard(search = '') {
+  const params = search ? `?search=${encodeURIComponent(search)}` : '';
+  const res = await fetch(`${API_BASE}/api/leaderboard${params}`);
   if (!res.ok) throw new Error('Failed to fetch leaderboard');
   return res.json();
 }
@@ -66,4 +69,50 @@ export async function fetchCustomerPoints(phone) {
   const res = await fetch(`${API_BASE}/api/points/${encodeURIComponent(phone)}`);
   if (!res.ok) throw new Error('Failed to fetch points');
   return res.json();
+}
+
+export async function fetchProfile(phone) {
+  const res = await fetch(`${API_BASE}/api/profile/${encodeURIComponent(phone)}`);
+  if (!res.ok) throw new Error('Failed to fetch profile');
+  return res.json();
+}
+
+export async function fetchAchievements(phone) {
+  const res = await fetch(`${API_BASE}/api/achievements/${encodeURIComponent(phone)}`);
+  if (!res.ok) throw new Error('Failed to fetch achievements');
+  return res.json();
+}
+
+export async function fetchRewards() {
+  const res = await fetch(`${API_BASE}/api/rewards`);
+  if (!res.ok) throw new Error('Failed to fetch rewards');
+  return res.json();
+}
+
+export async function redeemReward(phone, rewardId) {
+  const res = await fetch(`${API_BASE}/api/redeem`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone, reward_id: rewardId }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to redeem');
+  return data;
+}
+
+export async function fetchMyRewards(phone) {
+  const res = await fetch(`${API_BASE}/api/my-rewards/${encodeURIComponent(phone)}`);
+  if (!res.ok) throw new Error('Failed to fetch rewards');
+  return res.json();
+}
+
+export async function applyReferral(phone, code) {
+  const res = await fetch(`${API_BASE}/api/referral/apply`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone, referral_code: code }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to apply referral');
+  return data;
 }
